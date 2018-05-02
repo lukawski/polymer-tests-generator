@@ -1,0 +1,16 @@
+{
+  "name": "polymer-tests-generator",
+  "version": "1.0.0",
+  "description": "CLI for generating tests for Polymer components & mixins.",
+  "main": "index.js",
+  "bin": {
+    "polymer-tests": "./index.js"
+  },
+  "repository": "git@github.com:lukawski/polymer-tests-generator.git",
+  "author": "Kacper Łukawski",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.2.3",
+    "commander": "^2.15.1"
+  }
+}
