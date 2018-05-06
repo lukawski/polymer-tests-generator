@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const program = require('commander');
 const colors = require('colors');
@@ -11,8 +11,12 @@ program
 	.parse(process.argv);
 
 function isDirectory(path) {
+	try {
 	const stat = fs.lstatSync(path);
 	return stat.isDirectory();
+	} catch (err) {
+		console.log(`Error checking if path is directory: ${err}`.red);
+	}
 }
 
 function mapFolder(err, files) {
@@ -20,53 +24,61 @@ function mapFolder(err, files) {
 
 	if (!files.length) return console.log('Given directory is empty.'.yellow);
 
-	createTestDirectory(program.path);
-	createTestIndex(componentPath);
+	createTestDirectory(program.path)
+		.then(() => fs.readdir(path.join(COMPONENT_PATH, 'test')))
+		.then((existingFiles) => { mapFiles(existingFiles, files); })
+		.catch(err => console.log(`Something went wrong: ${err}`.red));
+}
 
+function mapFiles(existingTests, components, currentDirectory = '') {
+	const filtered = filterComponents(existingTests, components);
 
-	for (let i = 0, len = files.length; i < len; i++) {
-		const currentPath = `${componentPath}${path.sep}${files[i]}`;
+	for (let i = 0, len = filtered.length; i < len; i++) {
+		const currentComponent = filtered[i];
+		const currentPath = path.resolve(COMPONENT_PATH, currentDirectory, currentComponent)
 
 		if (isDirectory(currentPath)) {
-			fs.readdir(currentPath, mapFolder);
-		} else {
-			createTest(files[i]);
+			fs.readdir(currentPath)
+				.then(files => { mapFiles(existingTests, files, currentComponent); })
+		} else if (path.extname(currentComponent) === '.html') {
+			createTest(currentComponent);
 		}
 	}
 }
 
-function mapFiles(files) {
+function filterComponents(existing, components) {
+	const IGNORED = ['demo', 'index.html', 'test', ...existing];
 
+	return components.filter(c => !IGNORED.includes(c));
 }
 
 function createTestIndex(componentPath) {
-	fs.readFile(`${__dirname}${path.sep}index-test-seed.html`, 'utf-8', (err, data) => {
-		fs.writeFile(`${componentPath}${path.sep}test${path.sep}index.html`, data, 'utf-8', (err) => {
-			if (err) console.log(`Can't create index file`.red);
-		});
-	});
+	return fs.readFile(`${__dirname}${path.sep}index-test-seed.html`, 'utf-8')
+		.then(data => fs.writeFile(`${componentPath}${path.sep}test${path.sep}index.html`, data, 'utf-8'))
+		.catch(() => console.log(`Can't create index file`.red));
 }
 
 function createTest(componentName) {
-	fs.readFile(`${__dirname}${path.sep}test-suite-seed.html`, 'utf-8', (err, data) => {
-		fs.writeFile(`${componentPath}${path.sep}test${path.sep}${componentName}`, data, 'utf-8', (err) => {
-			if (err) console.log(`Can't create test for ${componentName}`.red);
-		});
-	});
+	return getTestSeed()
+		.then(data => data.replace(/{{name}}/g, path.basename(componentName, '.html')))
+		.then(processedData =>  fs.writeFile(path.join(COMPONENT_PATH, 'test', componentName), processedData, 'utf-8'))
+		.then(() => console.log(`Created test for ${componentName}`.green))
+		.catch(() => console.log(`Can't create test for ${componentName}`.red));
 }
 
 function createTestDirectory(componentPath) {
-	fs.mkdirSync(`${componentPath}${path.sep}test`);
+	return fs.ensureDir(path.join(componentPath, 'test'));
 }
 
 function getTestSeed() {
-
+	return fs.readFile(path.join(__dirname, 'test-suite-seed.html'), 'utf-8')
+		.catch(() => console.log(`Can't get test seed.`.red));
 }
 
-const componentPath = `${process.cwd()}${path.sep}${program.path}`;
+const COMPONENT_PATH = path.resolve('', program.path);
 
 if (program.path) {
-	isDirectory(componentPath) ? fs.readdir(componentPath, mapFolder) : console.log('Provided path is not directory');
+	isDirectory(COMPONENT_PATH) ? fs.readdir(COMPONENT_PATH, mapFolder) : console.log('Provided path is not directory');
 } else {
 	console.log('You need to provide component path!'.red);
 }
