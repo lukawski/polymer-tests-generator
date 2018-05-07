@@ -39,7 +39,7 @@ function mapFiles(existingTests, components, currentDirectory = '') {
 
 		if (isDirectory(currentPath)) {
 			fs.readdir(currentPath)
-				.then(files => { mapFiles(existingTests, files, currentComponent); })
+				.then(files => { mapFiles(existingTests, files, path.join(currentDirectory, currentComponent)); })
 		} else if (path.extname(currentComponent) === '.html') {
 			createTest(currentComponent);
 		}
