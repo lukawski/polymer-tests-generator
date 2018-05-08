@@ -12,7 +12,8 @@ program
 
 function isDirectory(pathToCheck) {
   return fs.lstat(pathToCheck)
-    .then((stat) => { stat.isDirectory(); });
+    .then(stat => stat.isDirectory())
+    .then(isDir => (isDir ? Promise.resolve(isDir) : Promise.reject(Error('Provided path is not a directory'))));
 }
 
 function getTestSeed() {
@@ -99,8 +100,11 @@ function mapFolder(err, files) {
 const COMPONENT_PATH = path.resolve('', program.path);
 
 if (program.path) {
-  if (isDirectory(COMPONENT_PATH)) fs.readdir(COMPONENT_PATH, mapFolder);
-  else console.log('Provided path is not directory');
+  isDirectory(COMPONENT_PATH)
+    .then(() => {
+      fs.readdir(COMPONENT_PATH, mapFolder);
+    })
+    .catch(err => console.log(`Provided path is wrong. ${err}`.red));
 } else {
   console.log('You need to provide component path!'.red);
 }
