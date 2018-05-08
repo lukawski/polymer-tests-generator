@@ -60,7 +60,7 @@ function createTest(componentName) {
   return getTestSeed()
     .then(data => data.replace(/{{name}}/g, path.basename(componentName, '.html')))
     .then(processedData => fs.writeFile(path.join(COMPONENT_PATH, 'test', componentName), processedData, 'utf-8'))
-    .then(() => updateSuitesList(componentName))
+    // .then(() => updateSuitesList(componentName))
     .then(() => console.log(`Created test for ${componentName}`.green))
     .catch(err => console.log(`Can't create test for ${componentName}. ${err}`.red));
 }
