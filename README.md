@@ -46,7 +46,7 @@ So if you already have a test for `siema.html` it's not gonna override it.
 
 That's it. Simple and fun when machine does it for you!
 
-####Seed files
+#### Seed files
 * [index.html](https://github.com/lukawski/polymer-tests-generator/blob/master/index-test-seed.html)
 * [test.html](https://github.com/lukawski/polymer-tests-generator/blob/master/test-suite-seed.html)
 
