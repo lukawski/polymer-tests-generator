@@ -16,7 +16,7 @@ And here comes `polymer-tests-generator`, simple cli intended to automate this p
 
 ### Usage
 
-`polymer-test [options]`
+`polymer-tests [options]`
 
 #### CLI options
 
