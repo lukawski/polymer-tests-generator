@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env node
 const globby = require('globby');
 const path = require('path');
 const program = require('commander');
