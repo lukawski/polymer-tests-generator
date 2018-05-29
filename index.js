@@ -25,10 +25,13 @@ const createTestIndex = (componentPath) => {
       seedData = data;
       return fs.readFile(indexPath, 'utf-8');
     })
-    .then(() => { console.log('Index file already exists'.green); })
-    .catch(() => fs.writeFile(indexPath, seedData))
     .then(() => {
-      console.log('Created index file'.green)
+      console.log('Index file already exists'.green);
+      return Promise.resolve(true);
+    })
+    .catch(() => fs.writeFile(indexPath, seedData))
+    .then((exists) => {
+      if (!exists) console.log('Created index file'.green);
       return seedData;
     })
     .catch(() => console.log('Can\'t create index file'.red));
@@ -38,9 +41,9 @@ const updateSuitsList = components =>
   createTestIndex(COMPONENT_PATH)
     .then((data) => {
       const [match] = data.match(/(\(\[)([^]*)(\]\))/);
-      console.log(match)
+      // console.log(match);
       const list = match.slice(2, match.length - 2);
-      console.log('list', list);
+      // console.log('list', list);
       return true;
     });
 
@@ -60,18 +63,23 @@ const createTest = (componentName, testSeed, compPath) => {
 
 const createTestDirectory = componentPath => fs.ensureDir(path.join(componentPath, 'test'));
 
-const filterExisting = (files, existingTests) => files.filter(file => !existingTests.includes(file));
+const filterExisting = (files, existingTests) =>
+  files.filter(file => !existingTests.includes(file));
 
 const flatten = files => files.map(file => path.basename(file));
 
-const findComponentPath = (compName, paths = []) => paths.find(compPath => compPath.includes(compName));
+const findComponentPath = (compName, paths = []) =>
+  paths.find(compPath => compPath.includes(compName));
 
 const generateTests = ([files = [], existingTests = []] = []) => {
   const components = filterExisting(flatten(files), flatten(existingTests));
 
   return createTestDirectory(COMPONENT_PATH)
     .then(() => getTestSeed())
-    .then(seed => Promise.all([updateSuitsList(components), ...components.map(component => createTest(component, seed, findComponentPath(component, files)))]));
+    .then(seed => Promise.all([
+      updateSuitsList(components),
+      ...components.map(component => createTest(component, seed, findComponentPath(component, files))),
+    ]));
 };
 
 if (program.path) {
