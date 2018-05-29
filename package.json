@@ -1,7 +1,7 @@
 {
   "name": "polymer-tests-generator",
   "version": "1.0.0",
-  "description": "CLI for generating tests for Polymer components & mixins.",
+  "description": "CLI for generating tests for Polymer components",
   "main": "index.js",
   "bin": {
     "polymer-tests": "./index.js"
