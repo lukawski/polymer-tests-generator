@@ -56,6 +56,6 @@ Feel free to create [issues](https://github.com/lukawski/polymer-tests-generator
 **But please, for any new feature first create an issue so we can discuss it :)**
 
 ### Todo
-- [ ] update suites list in `index.html`
+- [x] update suites list in `index.html`
 - [ ] improve checking if test exists
 - [ ] generate tests for mixins
